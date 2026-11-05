@@ -76,44 +76,6 @@ public class CalcGen {
         }
     }
 
-    private void writeResults(String Operation) {
-        operatorName = Operation;
-        operatorSymbol = getOperatorSymbol(operatorName);
-
-        try {
-            bW.write("======================");
-            bW.newLine();
-            bW.write("       " + operatorName + "       ");
-            bW.newLine();
-            bW.write("======================");
-            bW.newLine();
-        } catch (IOException e) {
-            System.out.println("vvv Something went wrong! vvv\n" + e);
-        }
-
-        for (int i = minRange; i <= maxRange; i++) {
-            for (int j = minRange; j <= maxRange; j++) {
-                try {
-                    // i and j both start at 1 for the sake of printing out the operands
-                    // if we also use them for getting the result by index, we are now get the index offset by 2
-                    // this is why we do -2, to get the actual true result from the operands, and not the result from 2 lines down.
-                    bW.write("    " + i + operatorSymbol + j + " = " + formatResults(calculations)[i + j - 2]); 
-                    bW.newLine();
-                } catch (IOException e) {
-                    System.out.println("vvv Something went wrong at write step " + i + "! vvv\n" + e); 
-                }
-            }
-        }
-    }
-
-    private String[] formatResults(double[] toFormat) {
-        for (int i = 0; i < strCalculations.length; i++) {
-            strCalculations[i] = df.format(calculations[i]);
-        }
-
-        return strCalculations;
-    }
-
     private double[] calculateOperation(int min, int max, String operation) {
         currentPlace = 0;
 
@@ -164,56 +126,42 @@ public class CalcGen {
         }
     }
 
-    private double[] calculateAddition(int min, int max) {
-        currentPlace = 0;
-
-        for (double i = min; i <= max; i++) {
-            for (double j = min; j <= max; j++) {
-                calculations[currentPlace] = i + j;
-                currentPlace++;
-            }
+    private String[] formatResults(double[] toFormat) {
+        for (int i = 0; i < strCalculations.length; i++) {
+            strCalculations[i] = df.format(calculations[i]);
         }
 
-        return calculations;
+        return strCalculations;
     }
 
-    private double[] calculateSubtraction(int min, int max) {
-        currentPlace = 0;
+    private void writeResults(String Operation) {
+        operatorName = Operation;
+        operatorSymbol = getOperatorSymbol(operatorName);
 
-        for (double i = min; i <= max; i++) {
-            for (double j = min; j <= max; j++) {
-                calculations[currentPlace] = i - j;
-                currentPlace++;
-            }
+        try {
+            bW.write("======================");
+            bW.newLine();
+            bW.write("       " + operatorName + "       ");
+            bW.newLine();
+            bW.write("======================");
+            bW.newLine();
+        } catch (IOException e) {
+            System.out.println("vvv Something went wrong! vvv\n" + e);
         }
 
-        return calculations;
-    }
-
-    private double[] calculateMultiplication(int min, int max) {
-        currentPlace = 0;
-
-        for (double i = min; i <= max; i++) {
-            for (double j = min; j <= max; j++) {
-                calculations[currentPlace] = i * j;
-                currentPlace++;
+        for (int i = minRange; i <= maxRange; i++) {
+            for (int j = minRange; j <= maxRange; j++) {
+                try {
+                    // i and j both start at 1 for the sake of printing out the operands
+                    // if we also use them for getting the result by index, we are now get the index offset by 2
+                    // this is why we do -2, to get the actual true result from the operands, and not the result from 2 lines down.
+                    bW.write("    " + i + operatorSymbol + j + " = " + formatResults(calculations)[i + j - 2]); 
+                    bW.newLine();
+                } catch (IOException e) {
+                    System.out.println("vvv Something went wrong at write step " + i + "! vvv\n" + e); 
+                }
             }
         }
-
-        return calculations;
-    }
-
-    private double[] calculateDivision(int min, int max) {
-        currentPlace = 0;
-
-        for (double i = min; i <= max; i++) {
-            for (double j = min; j <= max; j++) {
-                calculations[currentPlace] = i / j;
-                currentPlace++;
-            }
-        }
-
-        return calculations;
     }
 
     private String getOperatorSymbol(String operatorName) {
