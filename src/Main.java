@@ -2,6 +2,6 @@ package src;
 
 class Main {
     public static void main(String args[]) {
-        new CalcGen(1, 5);
+        Driver d = new Driver(1, 100);
     }
 }
