@@ -10,20 +10,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.io.IOException;
 
-/*
-
-Initialize the file
-    delete old file
-    create new one
-    create a buffered writer and return it
-
-Initalize the array
-    create the array
-
-
-
- */
-
 public class Generator {
 
     private File f;
@@ -88,24 +74,29 @@ public class Generator {
             writer.write("private static Scanner s = new Scanner(System.in);");
             writer.newLine();
             writer.newLine();
+            writer.write("private static int a;");
+            writer.write("private static int b;");
+            writer.write("private static String op;");
+            writer.newLine();
+            writer.newLine();
             writer.write("    public static void main(String[] args) {");
             writer.newLine();
             writer.write("        System.out.print(\"Input operand #1: \");");
             writer.newLine();
-            writer.write("        s.nextLine();");
+            writer.write("        a = Integer.getInteger(s.nextLine());"); // Assuming this translates the string '1' into value 1, and doesnt just cast it to an integer
             writer.newLine();
             writer.write("        System.out.print(\"Input operand #2: \");");
             writer.newLine();
-            writer.write("        s.nextLine();");
+            writer.write("        b = Integer.getInteger(s.nextLine());");
             writer.newLine();
             writer.write("        System.out.print(\"Choose operator (add, sub, mul, div): \");");
             writer.newLine();
-            writer.write("        s.nextLine();");
+            writer.write("        op = s.nextLine();");
             writer.newLine();
             writer.write("        System.out.println(\"Calculating...\");");
             writer.newLine();
             writer.newLine();
-            writer.write("        new HardcodedCalculator();");
+            writer.write("        new HardcodedCalculator(int a, int b, String op);");
             writer.newLine();
             writer.write("    }");
             writer.newLine();
@@ -114,6 +105,16 @@ public class Generator {
             System.out.println("vvv Something went wrong with generating main! vvv " + e.getMessage());
         }
         
+
+    }
+
+    public void generateBoilerPlate() {
+
+    }
+    /**
+     * Defines the length of the internal array used for storing each line of text based on set parameters
+     */
+    public void setTextResources(int operators, int operands) {
 
     }
 
