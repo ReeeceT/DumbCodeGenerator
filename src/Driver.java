@@ -4,19 +4,27 @@ import java.text.DecimalFormat;
 
 import src.tools.calculator.Calculator;
 import src.tools.calculator.Calculator.Operations;
-import src.tools.generator.CodeGenerator;
+import src.tools.generator.Generator;
 import java.text.DecimalFormat;
 
 public class Driver {
-    private Calculator c;
-    private CodeGenerator cG;
+    private Calculator calc;
+    private Generator gen;
     private final DecimalFormat df;
 
     public Driver(int min, int max) {
-        c = new Calculator(min, max);
-        cG = new CodeGenerator(c);
+        calc = new Calculator(min, max);
+        gen = new Generator(calc);
         df = new DecimalFormat("#0.######");
 
-        c.calculateOperation(Operations.ADDITION);
+        gen.createFileFromPath("generation/Main.java");
+        gen.writeToFile("generation/Main.java");
+        gen.generateMain();
+        gen.closeWriter();
+
+        gen.createFileFromPath("generation/HardcodedCalculator.java");
+        gen.writeToFile("generation/HardcodedCalculator.java");
+        gen.closeWriter();
+        
     }
 }

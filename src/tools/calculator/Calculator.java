@@ -21,7 +21,7 @@ public class Calculator {
     public Calculator(int min, int max) {
         this.MIN = min;
         this.MAX = max;
-        this.TOTAL_OPERATIONS =4;
+        this.TOTAL_OPERATIONS = 4;
         this.ROWS_LENGTH = MAX*MAX;
         this.COLUMNS_LENGTH = 3;
 
