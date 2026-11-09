@@ -17,16 +17,13 @@ public class Driver {
         gen = new Generator(calc);
         df = new DecimalFormat("#0.######");
 
-        // Generate the Main.java file
-        gen.createFileFromPath("generation/Main.java");
-        gen.writeToFile("generation/Main.java");
-        gen.generateMain();
-        gen.closeWriter();
+        // Generate a main file with imports
+        gen.createFileFromPath("generation/main.j", 20);
+        gen.setWritingToFile("generation/main.j");
+        gen.generateBoilerPlate("generation", 5, "main", true);
 
-        // Generate the actual hard coded calculator file
-        gen.createFileFromPath("generation/HardcodedCalculator.java");
-        gen.writeToFile("generation/HardcodedCalculator.java");
-        gen.closeWriter();
-        
+        gen.beginWriting();
+        System.out.println("\n\n\n Non BP Begin: " + gen.getNonBPBegin());
+        System.out.println("\n\n\n Non BP End: " + gen.getNonBPEnd());
     }
 }
