@@ -173,12 +173,13 @@ public class Generator {
         fLines[7 + numImports] = "    }\n";
         nonBPBegin = 8 + numImports;
 
-        for (int i = 8; i < fLines.length - 4; i++) {
+        for (int i = (8 + numImports); i < (fLines.length - 4); i++) {
             fLines[i] = "\n";
         }
         // Add in blank spaces corresponding to non BP begin and end
 
         fLines[fLines.length - 4] = "    public " + className + "() {\n";
+        fLines[fLines.length - 3] = "\n";
         fLines[fLines.length - 2] = "    }\n";
         fLines[fLines.length - 1] = "}";
     }
