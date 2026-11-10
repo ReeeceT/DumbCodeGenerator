@@ -1,0 +1,30 @@
+package generation;
+
+public class NoMainNoImports {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public NoMainNoImports() {
+
+    }
+}

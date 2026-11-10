@@ -17,13 +17,47 @@ public class Driver {
         gen = new Generator(calc);
         df = new DecimalFormat("#0.######");
 
-        // Generate a main file with imports
-        gen.createFileFromPath("generation/main.j", 20);
-        gen.setWritingToFile("generation/main.j");
-        gen.generateBoilerPlate("generation", 5, "main", true);
+        execute();
+    }
 
-        gen.beginWriting();
-        System.out.println("\n\n\n Non BP Begin: " + gen.getNonBPBegin());
-        System.out.println("\n\n\n Non BP End: " + gen.getNonBPEnd());
+    public void execute() {
+        gen.newBPGenerator()
+
+
+        // // Generate a main file with imports
+        // gen.createFileFromPath("generation/YesMainYesImports.txt", 20);
+        // gen.setWritingToFile("generation/YesMainYesImports.txt");
+        // gen.generateBoilerPlate("generation", 5, "YesMainYesImports", true);
+        // gen.beginWriting();
+
+        // System.out.println("\n\n\n Non BP Begin: " + gen.getNonBPBegin());
+        // System.out.println("\n\n\n Non BP End: " + gen.getNonBPEnd());
+
+        // // Generate a main file with NO imports
+        // gen.createFileFromPath("generation/YesMainNoImports.txt", 20);
+        // gen.setWritingToFile("generation/YesMainNoImports.txt");
+        // gen.generateBoilerPlate("generation", "YesMainNoImports", true);
+        // gen.beginWriting();
+
+        // System.out.println("\n\n\n Non BP Begin: " + gen.getNonBPBegin());
+        // System.out.println("\n\n\n Non BP End: " + gen.getNonBPEnd());
+
+        // // Generate a NON-main file with imports
+        // gen.createFileFromPath("generation/NoMainYesImports.txt", 20);
+        // gen.setWritingToFile("generation/NoMainYesImports.txt");
+        // gen.generateBoilerPlate("generation", 5, "NoMainYesImports", false);
+        // gen.beginWriting();
+
+        // System.out.println("\n\n\n Non BP Begin: " + gen.getNonBPBegin());
+        // System.out.println("\n\n\n Non BP End: " + gen.getNonBPEnd());
+
+        // // Generate a NON-main file with NO imports
+        // gen.createFileFromPath("generation/NoMainNoImports.txt", 20);
+        // gen.setWritingToFile("generation/NoMainNoImports.txt");
+        // gen.generateBoilerPlate("generation", "NoMainNoImports", false);
+        // gen.beginWriting();
+    
+        // System.out.println("\n\n\n Non BP Begin: " + gen.getNonBPBegin());
+        // System.out.println("\n\n\n Non BP End: " + gen.getNonBPEnd());
     }
 }

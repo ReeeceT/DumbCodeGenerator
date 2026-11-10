@@ -12,12 +12,24 @@ import java.io.IOException;
 
 /*
     TODO:
-    Make sure nonBPBegin is correct
+    Builder design pattern is ideal because this class will generate multiple files with multiple different parameters and configurations.
+
+        Generator.java
+    Which file is being written to is controlled by this class, not the driver. This is because it can easily be automated.
+    For example you can set the file youre editing with .onFile(), then finish and finally wirte to it with .generate()
+
+    Make a single predefined size array which will contain everything
+
+    Builder design pattern which will plug in certain things into specific areas, like the boilerplate
+    Something will scan through the array to find when non boilerplate code can begin and where it will end
+
+
+        Files.java
+    Creation of files
 
 */
 
 public class Generator {
-
     private File f;
     private BufferedWriter writer;
     private int nonBPBegin;
@@ -94,6 +106,8 @@ public class Generator {
      * 
      * What will be written here is currently hardcoded, so the array will be created by the class rather than the driver.
      * This should be changed later to use the generateBoilerPlate() method once it is defined properly.
+     * 
+     * @deprecated
      */
     public void writeMain() {
         fLines[0] =  "package results;\n";
@@ -140,7 +154,6 @@ public class Generator {
 
         closeWriter();
     }
-    
 
 
     /**
@@ -159,25 +172,39 @@ public class Generator {
     public void generateBoilerPlate(String packageName, int numImports, String className, boolean isMain) {
         // Currently handles import amounts and whether its main
         // Other method does not handle imports and shouldnt, but it should handle whether its main too
+
         fLines[0] = "package " + packageName + ";\n";
         fLines[1] = "\n";
 
+        // IMPORTS
         for (int i = 0; i < numImports; i++) {
             fLines[2+i] = "IMPORT HERE\n";
         }
 
-        fLines[3 + numImports] = "\n";
-        fLines[4 + numImports] = "public class " + className + " {\n";
-        fLines[5 + numImports] = "    public static void main(String[] args) {\n";
-        fLines[6 + numImports] = "\n";
-        fLines[7 + numImports] = "    }\n";
-        nonBPBegin = 8 + numImports;
+        if (isMain) {
+            fLines[3 + numImports] = "\n";
+            fLines[4 + numImports] = "public class " + className + " {\n";
+            fLines[5 + numImports] = "    public static void main(String[] args) {\n";
+            fLines[6 + numImports] = "\n";
+            fLines[7 + numImports] = "    }\n";
+            
+            nonBPBegin = 9 + numImports;
+            for (int i = 8; i < (fLines.length - 4); i++) {
+                fLines[i] = "\n";
+            }
+        } else {
+            nonBPBegin = 3 + numImports;
+            for (int i = 3; i < (fLines.length - 4); i++) {
+                fLines[i] = "\n";
+            }
+        }
 
+        // NON-BOILERPLATE
         for (int i = (8 + numImports); i < (fLines.length - 4); i++) {
             fLines[i] = "\n";
         }
-        // Add in blank spaces corresponding to non BP begin and end
 
+        nonBPEnd = fLines.length - 4;
         fLines[fLines.length - 4] = "    public " + className + "() {\n";
         fLines[fLines.length - 3] = "\n";
         fLines[fLines.length - 2] = "    }\n";
@@ -197,51 +224,36 @@ public class Generator {
      * @param isMain Should this generate the entry point boilerplate?
      */
     public void generateBoilerPlate(String packageName, String className, boolean isMain) {
-        for (int i = 0; i < fLines.length; i++) {
-            if (i == 0) {
-                fLines[i] = "package " + packageName + ";\n";
-                continue;
-            }
-            if (i == 1) {
-                fLines[i] = "\n";
-                continue;
-            }
-            if (i == 2) {
-                fLines[i] = "public class " + className + " {\n";
-                nonBPBegin = 3;
-                continue;
-            }
-            if (i == 3 && isMain) {
-                fLines[i] = "    public static void main(String[] args) {\n";
-                continue;
-            } 
-            if (i == 4) {
-                fLines[i] = "\n";
-                continue;
-            }
-            if (i == 5 && isMain) {
-                fLines[i] = "    }\n";
-                continue;
-            } 
-            if (i == 6) {
-                fLines[i] = "\n";
-                continue;
-            }
-            if (i == (fLines.length - 4)) {
-                fLines[i] = "    public " + className + "() {\n";
-                continue;
-            }
-            if (i == (fLines.length - 2)) {
-                fLines[i] = "    }\n";
-                continue;
-            }
-            if (i == (fLines.length - 1)) {
-                fLines[i] = "}";
-                continue;
-            }
+        fLines[0] = "package " + packageName + ";\n";
+        fLines[1] = "\n";
+        fLines[2] = "public class " + className + " {\n";
+        
+        if (isMain) {
+            fLines[4] = "    public static void main(String[] args) {\n";
+            fLines[5] = "\n";
+            fLines[6] = "    }\n";
 
+            for (int i = 8; i < (fLines.length - 4); i++) {
+                fLines[i] = "\n";
+            }
+        } else {
+            for (int i = 3; i < (fLines.length - 4); i++) {
+                fLines[i] = "\n";
+            }
+        }
+       
+        nonBPBegin = 9;
+
+        // NON-BOILERPLATE
+        for (int i = 8; i < (fLines.length - 4); i++) {
             fLines[i] = "\n";
         }
+
+        nonBPEnd = fLines.length - 4;
+        fLines[fLines.length - 4] = "    public " + className + "() {\n";
+        fLines[fLines.length - 3] = "\n";
+        fLines[fLines.length - 2] = "    }\n";
+        fLines[fLines.length - 1] = "}";
     }
 
     public void beginWriting() {
