@@ -137,7 +137,7 @@ public class Generator {
 
         // Set the actual code
         for (int i = 0; i < fLines.length; i++) {
-            fLines[i + nonBPBegin]
+            fLines[i + nonBPBegin] = "gur";
         }
         
         // Write ALL of it

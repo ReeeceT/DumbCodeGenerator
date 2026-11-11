@@ -26,12 +26,10 @@ public class Driver {
     }
 
     public void execute() {
-        fM.createFile(pathToFolder, "fM.txt");
-        fM.createFile(pathToFolder, "fM2.txt");
+        fM.createFile("generation", "fM.txt");
 
-        fM.writeToFile(fM.getFile("fM.txt"), "WASSSUUUUUPPPPP");
-        fM.writeToFile(fM.getFile("fM2.txt"), "BRAAHHHHH");
+        fM.writeToFile(fM.getFile("fM.txt"), "Wassup my brother!!!! oooohhhh yeah \nHellll yeahh");
 
-        fM.deleteFile("fM.txt");
+        // fM.deleteFile("fM.txt");
     }
 }

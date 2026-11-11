@@ -36,17 +36,23 @@ import java.io.IOException;
 
 // Manage creation of files and putting text in there
 public class FileMaker {
+    private final Path defaultRootDir;
+    private Path rootDir;
+    private Path workingDir;
+
     private File f;
     private BufferedWriter writer;
-    private Path workingDir;
+    
+    
 
     private ArrayList<File> registeredFiles;
 
     public FileMaker() {
+        defaultRootDir = Path.of("C:/Users/rtill/Program/Personal Proj/Java2026/DumbCodeGenerator/generation");
+        workingDir = defaultRootDir;
+
         f = null;
         writer = null;
-        workingDir = null;
-
         registeredFiles = new ArrayList<File>();
     }
 
@@ -103,16 +109,10 @@ public class FileMaker {
      * @param name - The name or relative path of the file to delete
      */
     public void deleteFile(String name) {
-        Path p = Path.of(name);
-        File f = p.toFile();
+        // If using internal working directory
+        deleteFile(Path.of(workingDir.toString(), name).toFile());
 
-        if (f.exists()) {
-            workingDir = Path.of(f.getParent()); // Only changes things if a relative path was used rather than a name
-            f.delete();
-            System.out.println("File \"" + f.toString() + "\" has been successfully deleted");
-        } else {
-            System.out.println("File \"" + f.toString() + "\" does not exist");
-        }
+        // If using a relative path
     }
 
     /**
@@ -138,22 +138,7 @@ public class FileMaker {
         }
     }
 
-    /**
-     * 
-     * @param relPath - The relative path to the file
-     * @return - A reference to the file
-     */
-    public File getFile(Path relPath) {
-        return relPath.toFile();
-    }
 
-    /**
-     * 
-     * @return - The ArrayList in which all newly-created files are registered.
-     */
-    public ArrayList<File> getRegisteredFiles() {
-        return registeredFiles;
-    }
 
     /**
      * 
@@ -207,44 +192,97 @@ public class FileMaker {
      * @param text - The text to be written
      */
     public void writeToFile(File f, String text) {
-        Path p = f.toPath();
+        writeToFile(f, toStringList(text));
+    }
 
-        try {
-            if (writer != null) {
-                System.out.println("Writer already open.");
+    /**
+     * 
+     * Each space in the text will be interpreted as a new index in the string list.
+     * TODO: Currently does not work if a word is larger than 50 characters long.
+     * 
+     * @param text - The text to convert to an array list.
+     * @return - An array list of the given string
+     */
+    private ArrayList<String> toStringList(String text) {
+        final char[] chars = text.toCharArray();
+        final int maxCapacity = 50;
+        int wordLength = 0;
 
-                writer.close(); // close any old writers
-                writer = Files.newBufferedWriter(p, StandardOpenOption.WRITE);
-            } else {        
-                System.out.println("Writer not created, creating a writer...");
-                writer = Files.newBufferedWriter(p, StandardOpenOption.WRITE);
-                System.out.println("Successfully created writer!");
+        StringBuilder word = new StringBuilder(maxCapacity);
+        ArrayList<String> stringList = new ArrayList<String>();
+
+        for (int i = 0; i < chars.length; i++) {
+            switch (chars[i]) {
+                case ' ':
+                    stringList.add(word.toString() + " ");
+                    word.delete(0, 50);
+                    wordLength = 0;
+                    break;
+                case '\n':
+                    stringList.add(word.toString());
+                    word.delete(0, 50);
+                    wordLength = 0;
+
+                    stringList.add("\n");
+                    word.delete(0, 50);
+                    break;
+                default:
+                    wordLength++;
+                    word.append(chars[i]);
+                    break;
             }
-        } catch (IOException e) {
-            System.out.println("vvv Something went wrong with creating writer! vvv\n" + e.getMessage()); 
-            return;
+
+            if (wordLength >= maxCapacity) {
+                System.out.println("ERR: Word length greater than " + maxCapacity + " not allowed");
+                break;
+            }
         }
 
-        try {
-            writer.write(text);
-        } catch (IOException e) {
-            System.out.println("vvv Failed to write to file " + f.toString() + "! vvv" + e.getMessage());
-        }
-        
-        // Close it so the text actually gets moved from memory into the file
-        try {
-            writer.close();
-        } catch (IOException e) {
-            System.out.println("vvv Failed to close the writer! vvv" + e.getMessage());
-        }
+        stringList.add(word.toString());
+        word.delete(0, 50);
+
+        return stringList;
     }
 
     /**
      * 
      * @return The path of the folder an operation was last done in. An operation could be creating a file, writing a file, deleting a file, etc.
      */
-    public Path getWorkingDirectory() {
+    public Path getWorkingDir() {
         return workingDir;
+    }
+
+    /**
+     * 
+     * @param relPath - The relative path to the file
+     * @return - A reference to the file
+     */
+    public File getFile(Path relPath) {
+        return relPath.toFile();
+    }
+
+    /**
+     * 
+     * @return - The ArrayList in which all newly-created files are registered.
+     */
+    public ArrayList<File> getRegisteredFiles() {
+        return registeredFiles;
+    }
+
+    /**
+     * 
+     * @param p - The path to set as the working directory
+     */
+    public void setWorkingDir(Path p) {
+        workingDir = p;
+    }
+
+    /**
+     * 
+     * @param p - The absolute directory all other paths will be relative to
+     */
+    public void setRootDir(String p) {
+
     }
 
     // Manage creating the arrays of text which the writer will write.
