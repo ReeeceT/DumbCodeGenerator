@@ -1,28 +1,39 @@
 package src;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.text.DecimalFormat;
 
 import src.tools.calculator.Calculator;
 import src.tools.calculator.Calculator.Operations;
 import src.tools.generator.Generator;
-import java.text.DecimalFormat;
+import src.tools.generator.FileMaker;
+
 
 public class Driver {
     private Calculator calc;
-    private Generator gen;
-    private final DecimalFormat df;
+    private FileMaker fM;
+    
+    private Path pathToFolder;
 
     public Driver(int min, int max) {
         calc = new Calculator(min, max);
-        gen = new Generator(calc);
-        df = new DecimalFormat("#0.######");
+        fM = new FileMaker();
+
+        pathToFolder = Path.of("generation");
 
         execute();
     }
 
     public void execute() {
-        gen.newBPGenerator()
+        fM.createFile(pathToFolder, "fM.txt");
+        fM.writeToFile(fM.getFile("fM.txt"), "WASSSUUUUUPPPPP");
+        fM.deleteFile(fM.getFile("fM.txt"));
 
+        // System.out.println("Working Path:          " + fM.getWorkingDirectory().toString());
+        // System.out.println("Path of selected file: " + fM.getFile("fM.txt").toString());
+
+        
 
         // // Generate a main file with imports
         // gen.createFileFromPath("generation/YesMainYesImports.txt", 20);
