@@ -30,6 +30,8 @@ import java.io.IOException;
 
     Eventually want to swap out the strings representing paths for ACTUAL path types?
     Figure out how to adhere to the DRY principle, as some code is absolutely being unnecessarily written twice here.
+
+    Want to be able to iterate through all created files. This is why things are stored in an array list.
 */
 
 // Manage creation of files and putting text in there
@@ -75,9 +77,37 @@ public class FileMaker {
         }
     }
 
+    public File createFile(String relPathToFolder, String name) {
+        return null;
+    }
+
+    /**
+     * 
+     * @param f - The file to delete
+     */
     public void deleteFile(File f) {
         if (f.exists()) {
             workingDir = Path.of(f.getParent());
+            f.delete();
+            System.out.println("File \"" + f.toString() + "\" has been successfully deleted");
+        } else {
+            System.out.println("File \"" + f.toString() + "\" does not exist");
+        }
+    }
+
+    /**
+     * 
+     * TODO: Actually add implementation to take in a relative path too.
+     * If a relative path is not used, this method checks the current working directory.
+     * 
+     * @param name - The name or relative path of the file to delete
+     */
+    public void deleteFile(String name) {
+        Path p = Path.of(name);
+        File f = p.toFile();
+
+        if (f.exists()) {
+            workingDir = Path.of(f.getParent()); // Only changes things if a relative path was used rather than a name
             f.delete();
             System.out.println("File \"" + f.toString() + "\" has been successfully deleted");
         } else {
@@ -119,7 +149,7 @@ public class FileMaker {
 
     /**
      * 
-     * @return - The ArrayList in which all active files are registered.
+     * @return - The ArrayList in which all newly-created files are registered.
      */
     public ArrayList<File> getRegisteredFiles() {
         return registeredFiles;
@@ -139,7 +169,7 @@ public class FileMaker {
             if (writer != null) {
                 System.out.println("Writer already open.");
 
-                writer.close(); // close old writer
+                writer.close(); // close any old writers
                 writer = Files.newBufferedWriter(p, StandardOpenOption.WRITE);
             } else {        
                 System.out.println("Writer not created, creating a writer...");
@@ -169,7 +199,9 @@ public class FileMaker {
 
     /**
      * 
-     * Writes to a specified file.
+     * TODO: Can rewrite this to just delegate it to the above method. Reduces code significantly by not duplicating methods.
+     * Writes to a specified file. 
+     * 
      * 
      * @param f - The file to be written to
      * @param text - The text to be written
@@ -181,7 +213,7 @@ public class FileMaker {
             if (writer != null) {
                 System.out.println("Writer already open.");
 
-                writer.close(); // close old writer
+                writer.close(); // close any old writers
                 writer = Files.newBufferedWriter(p, StandardOpenOption.WRITE);
             } else {        
                 System.out.println("Writer not created, creating a writer...");
@@ -217,10 +249,11 @@ public class FileMaker {
 
     // Manage creating the arrays of text which the writer will write.
     public class TextBuilder {
-        private ArrayList<String> textBuffer; // Base, formatted boilerplate requires this many lines
+        private final int BOILER_PLATE_LINES = 11;
+        private ArrayList<String> textBuffer; 
 
         public TextBuilder() {
-            textBuffer = new ArrayList<String>(11);
+            textBuffer = new ArrayList<String>(BOILER_PLATE_LINES);
         }
 
         // Builder design pattern which constructs the text for a file.
