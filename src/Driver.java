@@ -11,25 +11,23 @@ import src.tools.generator.FileMaker;
 
 
 public class Driver {
-    private Calculator calc;
     private FileMaker fM;
-    
-    private Path pathToFolder;
+    private String[] args;
 
-    public Driver(int min, int max) {
-        calc = new Calculator(min, max);
+    public Driver() {
         fM = new FileMaker();
-
-        pathToFolder = Path.of("generation");
+        args = null;
 
         execute();
     }
 
     public void execute() {
-        fM.createFile("generation", "fM.txt");
+        fM.cd("generation");
+        fM.createFile("fM.txt");
+        fM.writeToFile("fM.txt", "whats up my brother\nHow ya doin?\n lolololol");
+    }
 
-        fM.writeToFile(fM.getFile("fM.txt"), "Wassup my brother!!!! oooohhhh yeah \nHellll yeahh");
-
-        // fM.deleteFile("fM.txt");
+    public void setArgs(String[] args) {
+        this.args = args;
     }
 }

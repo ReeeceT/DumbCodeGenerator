@@ -36,38 +36,36 @@ import java.io.IOException;
 
 // Manage creation of files and putting text in there
 public class FileMaker {
-    private final Path defaultRootDir;
-    private Path rootDir;
-    private Path workingDir;
+    private Path workingDir; // Always an absolute path
 
     private File f;
     private BufferedWriter writer;
     
-    
-
     private ArrayList<File> registeredFiles;
 
     public FileMaker() {
-        defaultRootDir = Path.of("C:/Users/rtill/Program/Personal Proj/Java2026/DumbCodeGenerator/generation");
-        workingDir = defaultRootDir;
+        workingDir = Path.of("C:/Users/rtill/Program/Personal Proj/Java2026/DumbCodeGenerator");
 
+        registeredFiles = new ArrayList<File>();
         f = null;
         writer = null;
-        registeredFiles = new ArrayList<File>();
     }
 
     /**
      * 
-     * Creates a file from a given path.
+     * Creates a file from a given path. Where the file is created depends on the set working directory.
      * 
-     * @param relPath - The path to the file which will be created. This is relative to this program's root directory
-     * @param suffix - The type of file. (.txt, .java, .jav)
+     * @param p - The path of the file to be created.
      * 
      * @return A reference to the created file
      */
-    public File createFile(Path relPathToFolder, String name) {
-        f = Path.of(relPathToFolder.toString(), name).toFile();
-        workingDir = Path.of(relPathToFolder.toString());
+    public File createFile(Path p) {
+        if (p.isAbsolute()) {
+            f = p.toFile();
+        } else {
+            f = Path.of(workingDir.toString(), p.toString()).toFile();
+        }
+
         registeredFiles.add(f);
 
         try {
@@ -83,8 +81,16 @@ public class FileMaker {
         }
     }
 
-    public File createFile(String relPathToFolder, String name) {
-        return null;
+    /**
+     * 
+     * Creates a file from a given path. Where the file is created depends on the set working directory.
+     * 
+     * @param name - The name of the file, including suffix.
+     * 
+     * @return A reference to the created file
+     */
+    public File createFile(String name) {
+        return createFile(Path.of(name));
     }
 
     /**
@@ -93,7 +99,7 @@ public class FileMaker {
      */
     public void deleteFile(File f) {
         if (f.exists()) {
-            workingDir = Path.of(f.getParent());
+            workingDir = Path.of(f.getParent()).toAbsolutePath();
             f.delete();
             System.out.println("File \"" + f.toString() + "\" has been successfully deleted");
         } else {
@@ -103,42 +109,19 @@ public class FileMaker {
 
     /**
      * 
-     * TODO: Actually add implementation to take in a relative path too.
      * If a relative path is not used, this method checks the current working directory.
      * 
      * @param name - The name or relative path of the file to delete
      */
     public void deleteFile(String name) {
-        // If using internal working directory
-        deleteFile(Path.of(workingDir.toString(), name).toFile());
+        Path p = Path.of(name);
 
-        // If using a relative path
-    }
-
-    /**
-     * 
-     * Finds and returns a file based on the current working directory.
-     * TODO: Need to make this method also work with relative paths
-     * 
-     * @param name - The name of the file
-     * @return - A reference to the file
-     */
-    public File getFile(String name) {
-        // If not relative path
-        Path p = Path.of(workingDir.toString(), name);
-
-        // If relative path
-        // set Path p = Path.of(relPath);
-
-        if (p.toFile().exists()) {
-            return p.toFile();
+        if (p.isAbsolute()) {
+            deleteFile(Path.of(name).toFile());
         } else {
-            System.out.println("File \"" + name + "\" does not exist in current working directory " + workingDir);
-            return p.toFile();
+            deleteFile(Path.of(workingDir.toString(), name).toFile());
         }
     }
-
-
 
     /**
      * 
@@ -184,15 +167,113 @@ public class FileMaker {
 
     /**
      * 
-     * TODO: Can rewrite this to just delegate it to the above method. Reduces code significantly by not duplicating methods.
      * Writes to a specified file. 
-     * 
      * 
      * @param f - The file to be written to
      * @param text - The text to be written
      */
     public void writeToFile(File f, String text) {
         writeToFile(f, toStringList(text));
+    }
+
+    /**
+     * 
+     * Writes to a specified file
+     * 
+     * @param f - The file to be written to
+     * @param text - The text to be written. Each index of the ArrayList writes to a new line in the file.
+     */
+    public void writeToFile(String f, ArrayList<String> text) {
+        writeToFile(Path.of(workingDir.toString(), f).toFile(), text);
+    }
+
+    /**
+     * 
+     * Writes to a specified file. 
+     *
+     * @param f - The file to be written to
+     * @param text - The text to be written
+     */
+    public void writeToFile(String f, String text) {
+        writeToFile(Path.of(workingDir.toString(), f).toFile(), toStringList(text));
+    }
+
+    /**
+     * 
+     * @return The path of the folder an operation was last done in. An operation could be creating a file, writing a file, deleting a file, etc.
+     */
+    public Path getWorkingDir() {
+        return workingDir;
+    }
+
+    /**
+     * 
+     * @param relPath - The relative path to the file
+     * @return - A reference to the file
+     */
+    public File getFile(Path p) {
+        if (p.isAbsolute()) {
+            File f = Path.of(p.toString()).toFile();
+        } else {
+            File f = Path.of(workingDir.toString(), p.toString()).toFile(); 
+        }
+        
+        if (f.exists()) {
+            return f;
+        } else {
+            System.out.println("File \"" + f.getName() + "\" does not exist in current working directory " + workingDir);
+            return f;
+        }
+    }
+
+    /**
+     * 
+     * Finds and returns a file based on the current working directory.
+     * TODO: Need to make this method also work with relative paths
+     * 
+     * @param name - The name of the file
+     * @return - A reference to the file
+     */
+    public File getFile(String name) {
+        return getFile(Path.of(name));
+    }
+
+    /**
+     * 
+     * TODO: Make return a list of the absolute paths to all files being edited
+     * 
+     * @return - The ArrayList in which all newly-created files are registered.
+     */
+    public ArrayList<File> getRegisteredFiles() {
+        return registeredFiles;
+    }
+
+    /**
+     * 
+     * @param p - The absolute path to set as the working directory
+     */
+    public void cd(Path p) {
+        if (p.isAbsolute()) {
+            workingDir = p;
+        } else {
+            workingDir = Path.of(workingDir.toString(), p.toString()); // Can I just directly add them together into one path instead of turning them into strings first.
+        }
+    }
+
+    /**
+     * 
+     * If ".." is passed, the working directory will be set back by one.
+     * TODO: Add support for inputs like ../../../dir1/dir2
+     * 
+     * @param p - The absolute path to set as the working directory
+     */
+    public void cd(String p) {
+        if (p.equals("..")) {
+            workingDir = workingDir.getParent();
+            return;
+        }
+
+        cd(Path.of(p));
     }
 
     /**
@@ -242,47 +323,6 @@ public class FileMaker {
         word.delete(0, 50);
 
         return stringList;
-    }
-
-    /**
-     * 
-     * @return The path of the folder an operation was last done in. An operation could be creating a file, writing a file, deleting a file, etc.
-     */
-    public Path getWorkingDir() {
-        return workingDir;
-    }
-
-    /**
-     * 
-     * @param relPath - The relative path to the file
-     * @return - A reference to the file
-     */
-    public File getFile(Path relPath) {
-        return relPath.toFile();
-    }
-
-    /**
-     * 
-     * @return - The ArrayList in which all newly-created files are registered.
-     */
-    public ArrayList<File> getRegisteredFiles() {
-        return registeredFiles;
-    }
-
-    /**
-     * 
-     * @param p - The path to set as the working directory
-     */
-    public void setWorkingDir(Path p) {
-        workingDir = p;
-    }
-
-    /**
-     * 
-     * @param p - The absolute directory all other paths will be relative to
-     */
-    public void setRootDir(String p) {
-
     }
 
     // Manage creating the arrays of text which the writer will write.
