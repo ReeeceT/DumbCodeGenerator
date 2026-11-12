@@ -8,6 +8,8 @@ import src.tools.calculator.Calculator;
 import src.tools.calculator.Calculator.Operations;
 import src.tools.generator.Generator;
 import src.tools.generator.FileMaker;
+import src.tools.generator.FileMaker.TextBuilder;
+import src.tools.generator.FileMaker.TextContent;
 
 
 public class Driver {
@@ -24,7 +26,7 @@ public class Driver {
     public void execute() {
         fM.cd("generation");
         fM.createFile("fM.txt");
-        fM.writeToFile("fM.txt", "whats up my brother\nHow ya doin?\n lolololol");
+        fM.writeToFile("fM.txt", fM.new TextContent("wasssah\ndesdwdwdwd\n lolololol"));
     }
 
     public void setArgs(String[] args) {

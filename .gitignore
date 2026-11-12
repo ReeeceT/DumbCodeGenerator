@@ -2,3 +2,6 @@
 bin/
 generation/
 .vscode/
+
+# Files
+TODO.md

@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.io.IOException;
+import java.util.HashMap;
 
 /*
     TODO:
@@ -26,10 +27,7 @@ import java.io.IOException;
 
 
         Files.java
-    Creation of files
-
-    Eventually want to swap out the strings representing paths for ACTUAL path types?
-    Figure out how to adhere to the DRY principle, as some code is absolutely being unnecessarily written twice here.
+    Creation of files?
 
     Want to be able to iterate through all created files. This is why things are stored in an array list.
 */
@@ -41,12 +39,12 @@ public class FileMaker {
     private File f;
     private BufferedWriter writer;
     
-    private ArrayList<File> registeredFiles;
+    private HashMap<String, File> registeredFiles;
 
     public FileMaker() {
         workingDir = Path.of("C:/Users/rtill/Program/Personal Proj/Java2026/DumbCodeGenerator");
 
-        registeredFiles = new ArrayList<File>();
+        registeredFiles = new HashMap<String, File>();
         f = null;
         writer = null;
     }
@@ -66,7 +64,7 @@ public class FileMaker {
             f = Path.of(workingDir.toString(), p.toString()).toFile();
         }
 
-        registeredFiles.add(f);
+        registeredFiles.put(f.getName(), f);
 
         try {
             if (f.exists()) {
@@ -100,6 +98,7 @@ public class FileMaker {
     public void deleteFile(File f) {
         if (f.exists()) {
             workingDir = Path.of(f.getParent()).toAbsolutePath();
+            registeredFiles.remove(f.getName());
             f.delete();
             System.out.println("File \"" + f.toString() + "\" has been successfully deleted");
         } else {
@@ -130,7 +129,7 @@ public class FileMaker {
      * @param f - The file to be written to
      * @param text - The text to be written. Each index of the ArrayList writes to a new line in the file.
      */
-    public void writeToFile(File f, ArrayList<String> text) {
+    public void writeToFile(File f, TextContent text) {
         Path p = f.toPath();
 
         try {
@@ -167,35 +166,61 @@ public class FileMaker {
 
     /**
      * 
-     * Writes to a specified file. 
+     * Writes to a specified file
      * 
-     * @param f - The file to be written to
-     * @param text - The text to be written
+     * @param path - The path of the file to be written to
+     * @param text - The text to be written. 
      */
-    public void writeToFile(File f, String text) {
-        writeToFile(f, toStringList(text));
+    public void writeToFile(Path path, TextContent text) {
+        if (path.isAbsolute()) {
+            writeToFile(path.toFile(), text);
+        } else {
+            writeToFile(Path.of(workingDir.toString(), path.toString()), text);
+        }
     }
 
     /**
      * 
      * Writes to a specified file
      * 
-     * @param f - The file to be written to
-     * @param text - The text to be written. Each index of the ArrayList writes to a new line in the file.
+     * @param path - The path of the file to be written to
+     * @param text - The text to be written. 
      */
-    public void writeToFile(String f, ArrayList<String> text) {
-        writeToFile(Path.of(workingDir.toString(), f).toFile(), text);
+    public void writeToFile(String path, TextContent text) {
+        if (Path.of(path).isAbsolute()) {
+            writeToFile(Path.of(path).toFile(), text);
+        } else {
+            writeToFile(Path.of(workingDir.toString(), path).toFile(), text);
+        }
+    }
+
+
+    /**
+     * 
+     * @param p - The absolute path to set as the working directory
+     */
+    public void cd(Path p) {
+        if (p.isAbsolute()) {
+            workingDir = p;
+        } else {
+            workingDir = Path.of(workingDir.toString(), p.toString()); // Can I just directly add them together into one path instead of turning them into strings first.
+        }
     }
 
     /**
      * 
-     * Writes to a specified file. 
-     *
-     * @param f - The file to be written to
-     * @param text - The text to be written
+     * If ".." is passed, the working directory will be set back by one.
+     * TODO: Add support for inputs like ../../../dir1/dir2
+     * 
+     * @param p - The absolute path to set as the working directory
      */
-    public void writeToFile(String f, String text) {
-        writeToFile(Path.of(workingDir.toString(), f).toFile(), toStringList(text));
+    public void cd(String p) {
+        if (p.equals("..")) {
+            workingDir = workingDir.getParent();
+            return;
+        }
+
+        cd(Path.of(p));
     }
 
     /**
@@ -248,92 +273,84 @@ public class FileMaker {
         return registeredFiles;
     }
 
-    /**
-     * 
-     * @param p - The absolute path to set as the working directory
-     */
-    public void cd(Path p) {
-        if (p.isAbsolute()) {
-            workingDir = p;
-        } else {
-            workingDir = Path.of(workingDir.toString(), p.toString()); // Can I just directly add them together into one path instead of turning them into strings first.
-        }
-    }
-
-    /**
-     * 
-     * If ".." is passed, the working directory will be set back by one.
-     * TODO: Add support for inputs like ../../../dir1/dir2
-     * 
-     * @param p - The absolute path to set as the working directory
-     */
-    public void cd(String p) {
-        if (p.equals("..")) {
-            workingDir = workingDir.getParent();
-            return;
-        }
-
-        cd(Path.of(p));
-    }
-
-    /**
-     * 
-     * Each space in the text will be interpreted as a new index in the string list.
-     * TODO: Currently does not work if a word is larger than 50 characters long.
-     * 
-     * @param text - The text to convert to an array list.
-     * @return - An array list of the given string
-     */
-    private ArrayList<String> toStringList(String text) {
-        final char[] chars = text.toCharArray();
-        final int maxCapacity = 50;
-        int wordLength = 0;
-
-        StringBuilder word = new StringBuilder(maxCapacity);
-        ArrayList<String> stringList = new ArrayList<String>();
-
-        for (int i = 0; i < chars.length; i++) {
-            switch (chars[i]) {
-                case ' ':
-                    stringList.add(word.toString() + " ");
-                    word.delete(0, 50);
-                    wordLength = 0;
-                    break;
-                case '\n':
-                    stringList.add(word.toString());
-                    word.delete(0, 50);
-                    wordLength = 0;
-
-                    stringList.add("\n");
-                    word.delete(0, 50);
-                    break;
-                default:
-                    wordLength++;
-                    word.append(chars[i]);
-                    break;
-            }
-
-            if (wordLength >= maxCapacity) {
-                System.out.println("ERR: Word length greater than " + maxCapacity + " not allowed");
-                break;
-            }
-        }
-
-        stringList.add(word.toString());
-        word.delete(0, 50);
-
-        return stringList;
-    }
-
     // Manage creating the arrays of text which the writer will write.
+    // Builder design pattern which constructs the text for a file.
     public class TextBuilder {
-        private final int BOILER_PLATE_LINES = 11;
-        private ArrayList<String> textBuffer; 
+        private TextContent textBuffer;
 
         public TextBuilder() {
-            textBuffer = new ArrayList<String>(BOILER_PLATE_LINES);
+            textBuffer = new TextContent(); 
         }
 
-        // Builder design pattern which constructs the text for a file.
+        public TextContent build() {
+            return textBuffer;
+        }
+        
     }   
+
+    public class TextContent {
+        private final int BOILER_PLATE_LINES;
+        private ArrayList<String> textList;
+        private String text;
+        
+        public TextContent() {
+            BOILER_PLATE_LINES = 11;
+            textList = new ArrayList<String>(BOILER_PLATE_LINES);
+            this.text = "";
+        }
+
+        public TextContent(String text) {
+            BOILER_PLATE_LINES = 11;
+            textList = new ArrayList<String>(BOILER_PLATE_LINES);
+            this.text = text;
+        }
+
+        /**
+         * 
+         * Each space in the text will be interpreted as a new index in the string list.
+         * TODO: Currently does not work if a word is larger than 50 characters long.
+         * 
+         * @param text - The text to convert to an array list.
+         * @return - An array list of the given string
+         */
+        private ArrayList<String> toStringList() {
+            final char[] chars = text.toCharArray();
+            final int maxCapacity = 50;
+            int wordLength = 0;
+
+            StringBuilder word = new StringBuilder(maxCapacity);
+
+            for (int i = 0; i < chars.length; i++) {
+                switch (chars[i]) {
+                    case ' ':
+                        textList.add(word.toString() + " ");
+                        word.delete(0, 50);
+                        wordLength = 0;
+                        break;
+                    case '\n':
+                        textList.add(word.toString());
+                        word.delete(0, 50);
+                        wordLength = 0;
+
+                        textList.add("\n");
+                        word.delete(0, 50);
+                        break;
+                    default:
+                        wordLength++;
+                        word.append(chars[i]);
+                        break;
+                }
+
+                if (wordLength >= maxCapacity) {
+                    System.out.println("ERR: Word length greater than " + maxCapacity + " not allowed");
+                    break;
+                }
+            }
+
+            textList.add(word.toString());
+            word.delete(0, 50);
+
+            return textList;
+        }
+    }
 }
